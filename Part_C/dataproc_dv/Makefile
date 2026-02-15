@@ -1,6 +1,5 @@
 # Complete this make file such that when invoked "make all" it should run the simulation and dump the vcd file.
 # Also implement "make clean" to remove the build files.
-# Referred the uart_dv's Makefile to create this makefile for the processor as a peripheral.
 
 CROSS=riscv64-unknown-elf-
 CFLAGS=
@@ -11,12 +10,16 @@ sim: dataproc_tb.vvp dataproc_firmware.hex
 	vvp -N $< +firmware=dataproc_firmware.hex
 
 dataproc_tb.vvp: dataproc_tb.v \
-    rvsoc_wrapper.v \
-    spimemio.v \
-    simpleuart.v \
-    rvsoc.v \
-    picorv32.v \
-    spiflash.v \
+    ../DMAController_FixedAddr/dma_controller_top.v \
+	../DMAController_FixedAddr/dma_registers.v \
+	../DMAController_FixedAddr/dma_write_logic.v \
+	../DMAController_FixedAddr/dma_read_logic.v \
+    ../rvsoc_wrapper.v \
+    ../spimemio.v \
+    ../simpleuart.v \
+    ../rvsoc.v \
+    ../picorv32.v \
+    ../spiflash.v \
     ../../Part_B/data_prod_proc/data_proc.v \
     ../../Part_B/data_prod_proc/data_prod.v \
     ../../Part_B/data_prod_proc/async_fifo_top.v \
@@ -26,7 +29,8 @@ dataproc_tb.vvp: dataproc_tb.v \
     ../../Part_B/data_prod_proc/read_logic.v \
     ../../Part_B/data_prod_proc/reset_2ff_sync.v \
     ../../Part_B/data_prod_proc/write_logic.v \
-    ../../Part_B/data_prod_proc/fwft_wrapper.v
+    ../../Part_B/data_prod_proc/fwft_wrapper.v 
+
 	iverilog -s dataproc_tb -o $@ $^
 
 dataproc_firmware.elf: sections.ld start.s firmware.c

@@ -5,7 +5,7 @@
 #define reg_uart_data (*(volatile uint32_t*)0x02000008)
 
 void putchar(char c);
-void print(const char *p);
+void print(const char *p); 
 
 void main()
 {

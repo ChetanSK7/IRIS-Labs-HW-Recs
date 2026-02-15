@@ -1,4 +1,5 @@
 //Changes to the original given module are all followed by comments explaining the changes. 
+//THIS MODULE REMAINS THE SAME WITH OR WITHOUT DMA CONTROLLER. DMA IS AN INTERNAL BLOCK THAT FASTENS DATA TRANSFER. NONE OF ITS PORTS SHOW UP ON THE SOC. ONLY THE FIRMWARE TO BE CHANGED.
 
 module rvsoc_wrapper (
 	input clk,

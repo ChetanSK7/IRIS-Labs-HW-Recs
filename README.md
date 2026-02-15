@@ -529,7 +529,9 @@ Results printed on the terminal due to the UART module of the RISC V SoC. (Click
 
     DIRECT MEMORY ACCESS / DMA CONTROLLER
 
-*Please find the "dma-integration" branch to see the correspponding modules. Only the description and simulation results are shown in this README file. The README file in the branch contains more details on the DMA design process*
+Please find the "dma-integration" branch to see the correspponding modules. Only the description and simulation results are shown in this README file. The major changes for this integration is made in the [(rvsoc.v)](Part_C/rvsoc.v) , [(firmware.c)](Part_C/dataproc_dv/firmware.c), [(Makefile)](Part_C/dataproc_dv/Makefile) and [(dataproc_tb.v)](Part_C/dataproc_dv/dataproc_tb.v) modules. <br> 
+  - DMAController_Auto folder consists of the design for the DMA that automatically changes between Write and Read mode based on whether the FIFO is full or empty, unlike the DMAController_Standard that relies on the CPU manually instructing it for Read or Write. <br>
+   - DMAController_FixedAddr is the final optimized version, compatible with our SoC that handles Fixed Address Read and Write from the source and destination.
 
 ### Design Process:
 - In practical scenarios, the CPU carries out multiple functions like data transfer, running programs, handling heavy mathematics, etc. Hence at some points, it might compromise on the performance/throughput just to get all the work done together. To improve the efficiency of the CPU and more importantly, the speed of data transfer, DMA controller is introduced into the system.

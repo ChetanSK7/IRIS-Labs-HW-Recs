@@ -60,12 +60,15 @@ module rvsoc (
 	wire irq_stall = 0;
 	wire irq_uart = 0;
 
+	//DMA INTERRUPT WIRE.
+	wire dma_irq;
+
 	always @* begin
 		irq = 0;
 		irq[3] = irq_stall;
 		irq[4] = irq_uart;
 		irq[5] = irq_5;
-		irq[6] = irq_6;
+		irq[6] = dma_irq;				//DMA INTERRUPT CONNECTED TO irq_6 OF THE SOC.
 		irq[7] = irq_7;
 	end
 
@@ -80,11 +83,12 @@ module rvsoc (
 	wire spimem_ready;
 	wire [31:0] spimem_rdata;
 
-	reg ram_ready;
+	reg ram_ready_cpu;		            //READY SIGNAL FOR THE RAM SPECIFIC TO CPU
 	wire [31:0] ram_rdata;
 
 	//ready and rdata for proc are definedd along with its sel and output data carried back to the CPU i.e. the _do signals.
- 
+	//ready and rdata for the DMA are defined along with its sel and output data carried back to the CPU i.e. the _do signals.
+
 	assign iomem_valid = mem_valid && (mem_addr[31:24] > 8'h 01);
 	assign iomem_wstrb = mem_wstrb;
 	assign iomem_addr = mem_addr;
@@ -101,29 +105,51 @@ module rvsoc (
 	wire        simpleuart_reg_dat_wait;
 
 	
-	wire        proc_sel = mem_valid && (mem_addr[31:24] == 8'h04);   //Enables our proc module whenever address starts like 0x04...
-    wire [31:0] proc_do;									          //Output from the processor that goes back to the CPU.
-	wire        proc_ready = proc_sel;							      //The proc is ready whenever selected.
+	wire proc_sel = (dma_req || mem_valid) && (final_ram_addr[31:24] == 8'h04);  //Enables our proc module whenever address starts like 0x04...
+    wire [31:0] proc_do;									          			 //Output from the processor that goes back to the CPU.
+	wire        proc_ready = proc_sel;							     			 //The proc is ready whenever selected.
 	
+	
+	//DMA SELECT LOGICC:
+	wire        dma_sel = mem_valid && (mem_addr[31:24] == 8'h05);    //Enables our DMA module whenever address starts like 0x05...
+	wire [31:0] dma_do;											      //Output from the DMA that goes back to the CPU.
+	wire        dma_cfg_ready = dma_sel; 							  //The DMA is ready whenever selected.
+
+	//DMA PORTS. (Refer dma_controller_top module for the i/o ports)  + MUX TO DECIDE RAM INPUTS I.E. CPU or DMA
+	wire        dma_req;
+	wire        dma_grant;
+	wire [31:0] dma_m_addr;
+	wire [31:0] dma_m_wdata;
+	wire        dma_m_wen;
+	wire        dma_m_ren;
+
+	assign dma_grant = dma_req;     							      //DMA is given higher priority since data transfer is the main functionality needed for our use case. Hence, whenever requested, the bus grant is given to the DMA.
+
+	wire [31:0] final_ram_addr  = dma_req ? dma_m_addr  : mem_addr;
+	wire [31:0] final_ram_wdata = dma_req ? dma_m_wdata : mem_wdata;
+	wire [3:0]  final_ram_wen   = dma_req ? {4{dma_m_wen}} : ((mem_valid && !mem_ready && mem_addr < 4*MEM_WORDS) ? mem_wstrb : 4'b0);
+
 
 	assign mem_ready =
     (iomem_valid && iomem_ready) ||
     spimem_ready ||
-    ram_ready ||
+    ram_ready_cpu ||
     spimemio_cfgreg_sel ||
     simpleuart_reg_div_sel ||
     (simpleuart_reg_dat_sel && !simpleuart_reg_dat_wait) ||
-	(proc_ready);                                                    //Updated to include processor's acknowledge signal.
+	(proc_ready && !dma_req) ||                                                  //Updated to include processor's acknowledge signal.
+	(dma_cfg_ready);												 //Updated to include DMA's ready signal.
 
 	assign mem_rdata =
     (iomem_valid && iomem_ready) ? iomem_rdata :
     spimem_ready                ? spimem_rdata :
-    ram_ready                   ? ram_rdata :
+    ram_ready_cpu               ? ram_rdata :
     spimemio_cfgreg_sel         ? spimemio_cfgreg_do :
     simpleuart_reg_div_sel      ? simpleuart_reg_div_do :
     simpleuart_reg_dat_sel      ? simpleuart_reg_dat_do :
 	proc_sel                    ? proc_do :					         //mem_rdata updated to include processor's logic for deciding mem_rdata.
-    32'h0;													         //READ MUX
+    dma_sel						? dma_do :							 //mem_rdata updated to include DMA's logic for deciding mem_rdata.
+	32'h0;													         //READ MUX
 
 	picorv32 #(
 		.STACKADDR(STACKADDR),
@@ -215,25 +241,52 @@ module rvsoc (
         .valid_out(valid_out),
         
 		//Instantiations based on the variables defined by the CPU.
-        .addr_in(mem_addr[4:0]),			//CPU sends a 32 bit addr, but we only need the offset i.e. 5 LSBs to determine mode_reg & kernel_reg.
-        .wr_data_in(mem_wdata),				
-        .write_en(proc_sel & |mem_wstrb),	//Write action only if CPU is pointing at any 0x03.. address or the Write Strobe signal is high.
+        .addr_in(final_ram_addr[4:0]),			//CPU sends a 32 bit addr, but we only need the offset i.e. 5 LSBs to determine mode_reg & kernel_reg.
+        .wr_data_in(final_ram_wdata),				
+        .write_en(proc_sel & | final_ram_wen),	//Write action only if CPU is pointing at any 0x03.. address or the Write Strobe signal is high.
         .rd_data_out(proc_do)				//Connects proc output to the READ MUX.
 	);
+
+
+	//DMA CONTROLLER INSTANTIATION.
+	dma_controller_top dma_inst(
+		.clk(clk),
+		.reset(resetn),
+		
+		// CPU Interface.
+		.cpu_wr_en(dma_sel && |mem_wstrb), 			//Write if dma selected and strobe high
+		.cpu_rd_en(dma_sel && !(|mem_wstrb)), 		//Read if dma selected and strobe low
+		.cpu_addr(mem_addr),
+		.cpu_wr_data(mem_wdata),
+		.cpu_rd_data(dma_do),
+
+		// Master Interface (To Access RAM)
+		.mem_request(dma_req),
+		.mem_grant(dma_grant),
+		.mem_addr(dma_m_addr),
+		.mem_rdata(mem_rdata), 						// DMA reads from RAM
+		.mem_wdata(dma_m_wdata),
+		.mem_wr_enable(dma_m_wen),
+		.mem_rd_enable(dma_m_ren),
+		
+		// Interrupt
+		.irq(dma_irq)
+	);
+
 
 
 	//----------------------------------------------------------------
 
 	always @(posedge clk)
-		ram_ready <= mem_valid && !mem_ready && mem_addr < 4*MEM_WORDS;
+		ram_ready_cpu <= (mem_valid && !mem_ready && mem_addr < 4*MEM_WORDS) && (!dma_req);				//CPU IS GIVEN PREFERENCE ONLY WHEN DMA HASN'T SENT ANY BUS CONTROL REQUESTS.
 
 	soc_mem #(
 		.WORDS(MEM_WORDS)
 	) memory (
 		.clk(clk),
-		.wen((mem_valid && !mem_ready && mem_addr < 4*MEM_WORDS) ? mem_wstrb : 4'b0),
-		.addr(mem_addr[23:2]),
-		.wdata(mem_wdata),
+		.wen(final_ram_wen),
+		.addr(final_ram_addr[23:2]),																	//SHIFTED TO CONVERT BYTE ADDRESSING TO WORD ADDRESSING.
+		.wdata(final_ram_wdata),
 		.rdata(ram_rdata)
 	);
 endmodule

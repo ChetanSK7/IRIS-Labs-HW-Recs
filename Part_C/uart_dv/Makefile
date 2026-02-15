@@ -1,4 +1,4 @@
-CROSS=riscv32-unknown-elf-
+CROSS=riscv64-unknown-elf-
 CFLAGS=
 
 all : sim

@@ -13,7 +13,7 @@ module dataproc_tb;
 		reset_cnt <= reset_cnt + !resetn;
 	end
 
-	localparam ser_half_period = 53;
+	localparam ser_half_period = 50;
 	event ser_sample;
 
 	wire ser_rx = 1'b1;			
@@ -85,7 +85,7 @@ module dataproc_tb;
 		.io1(flash_io1),
 		.io2(flash_io2),
 		.io3(flash_io3)
-	); 
+	);
 
 	reg [7:0] buffer;
 
@@ -105,11 +105,13 @@ module dataproc_tb;
 		repeat (ser_half_period) @(posedge clk);
 		repeat (ser_half_period) @(posedge clk);
 		-> ser_sample;
+		
 
 		if (buffer < 32 || buffer >= 127)
 			$display("Serial data: %d", buffer);
 		else
 			$display("Serial data: '%c'", buffer);
+
 	end
 
 	initial begin
@@ -118,17 +120,18 @@ module dataproc_tb;
     end
 
 
-	//To view waveform simulations on gtkwave and Vivado.
+	// NEW ADDITION: Firmware Loader (Works for BOTH Make & Vivado)
     reg [1023:0] firmware_file;
     initial begin
-        //For 'make', filename from command line is used.
+        // Strategy 1: If running 'make', use the filename from command line
         if ($value$plusargs("firmware=%s", firmware_file)) begin
             $readmemh(firmware_file, spiflash.memory);
         end
         
-        //For Vivado, hardcoded path of the .hex file is used
+        // Strategy 2: If running Vivado, use this hardcoded path
         else begin
-            $readmemh("C:/IRIS Labs-Hardware/IRIS-Labs-HW-Recs/Part_C/dataproc_dv_UART/dataproc_firmware.hex", spiflash.memory);
+            // IMPORTANT: Change this path to where YOUR file actually is!
+            $readmemh("C:/IRIS Labs-Hardware/IRIS-Labs-HW-Recs/Part_C/dataproc_dv/dataproc_firmware.hex", spiflash.memory);
         end
     end
 
