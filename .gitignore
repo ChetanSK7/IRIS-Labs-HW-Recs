@@ -1,0 +1,9 @@
+*.elf
+*.hex
+*.vcd
+*.vvp
+*.log
+*.jou
+# Ignore Vivado work directories
+/vivado*
+/xsim.dir/

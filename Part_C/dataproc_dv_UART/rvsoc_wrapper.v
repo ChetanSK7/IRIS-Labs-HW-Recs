@@ -1,3 +1,5 @@
+//Changes to the original given module are all followed by comments explaining the changes. 
+
 module rvsoc_wrapper (
 	input clk,
 	input resetn,
@@ -10,7 +12,14 @@ module rvsoc_wrapper (
 	inout  flash_io0,
 	inout  flash_io1,
 	inout  flash_io2,
-	inout  flash_io3
+	inout  flash_io3,
+
+	//Processor ports. 
+	input        valid,
+	input  [7:0] pixel,
+	output       valid_out,
+    output       ready,
+	output [7:0] pixel_out 
 );
 	parameter integer MEM_WORDS = 32768;
 
@@ -96,6 +105,12 @@ module rvsoc_wrapper (
 		.iomem_wstrb  (iomem_wstrb),
 		.iomem_addr   (iomem_addr),
 		.iomem_wdata  (iomem_wdata),
-		.iomem_rdata  (iomem_rdata)
+		.iomem_rdata  (iomem_rdata),
+
+	    .valid(valid),
+	    .pixel(pixel),
+	    .valid_out(valid_out),
+        .ready(ready),
+	    .pixel_out(pixel_out) 
 	);
 endmodule

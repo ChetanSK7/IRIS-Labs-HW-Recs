@@ -1,3 +1,5 @@
+//Changes to the original given module are all followed by comments explaining the changes. 
+
 module rvsoc (
 	input clk,
 	input resetn,
@@ -32,7 +34,14 @@ module rvsoc (
 	input  flash_io0_di,
 	input  flash_io1_di,
 	input  flash_io2_di,
-	input  flash_io3_di
+	input  flash_io3_di,
+
+	//Processor ports. (Testbench will need them as SoC pins to drive them)
+	input        valid,
+	input  [7:0] pixel,
+	output       valid_out,
+    output       ready,
+	output [7:0] pixel_out 
 );
 	parameter [0:0] BARREL_SHIFTER = 1;
 	parameter [0:0] ENABLE_MUL = 1;
@@ -74,6 +83,8 @@ module rvsoc (
 	reg ram_ready;
 	wire [31:0] ram_rdata;
 
+	//ready and rdata for proc are definedd along with its sel and output data carried back to the CPU i.e. the _do signals.
+ 
 	assign iomem_valid = mem_valid && (mem_addr[31:24] > 8'h 01);
 	assign iomem_wstrb = mem_wstrb;
 	assign iomem_addr = mem_addr;
@@ -89,13 +100,20 @@ module rvsoc (
 	wire [31:0] simpleuart_reg_dat_do;
 	wire        simpleuart_reg_dat_wait;
 
+	
+	wire        proc_sel = mem_valid && (mem_addr[31:24] == 8'h04);   //Enables our proc module whenever address starts like 0x04...
+    wire [31:0] proc_do;									          //Output from the processor that goes back to the CPU.
+	wire        proc_ready = proc_sel;							      //The proc is ready whenever selected.
+	
+
 	assign mem_ready =
     (iomem_valid && iomem_ready) ||
     spimem_ready ||
     ram_ready ||
     spimemio_cfgreg_sel ||
     simpleuart_reg_div_sel ||
-    (simpleuart_reg_dat_sel && !simpleuart_reg_dat_wait);
+    (simpleuart_reg_dat_sel && !simpleuart_reg_dat_wait) ||
+	(proc_ready);                                                    //Updated to include processor's acknowledge signal.
 
 	assign mem_rdata =
     (iomem_valid && iomem_ready) ? iomem_rdata :
@@ -104,7 +122,8 @@ module rvsoc (
     spimemio_cfgreg_sel         ? spimemio_cfgreg_do :
     simpleuart_reg_div_sel      ? simpleuart_reg_div_do :
     simpleuart_reg_dat_sel      ? simpleuart_reg_dat_do :
-    32'h0;
+	proc_sel                    ? proc_do :					         //mem_rdata updated to include processor's logic for deciding mem_rdata.
+    32'h0;													         //READ MUX
 
 	picorv32 #(
 		.STACKADDR(STACKADDR),
@@ -180,7 +199,27 @@ module rvsoc (
 		.reg_dat_wait(simpleuart_reg_dat_wait)
 	);
 
-	// Instantiate your data-processing-producing combined module here
+
+	//Data processor instantiation.
+
+	data_proc dataproc (
+		.clk(clk),
+		.rstn(resetn),
+		.sensor_clk(clk), 			//Using the same clock as proc (or) soc for the producer too, initially.
+		
+        .pixel_in(pixel),
+        .valid_in(valid),
+
+        .pixel_out(pixel_out),
+        .ready_out(ready),
+        .valid_out(valid_out),
+        
+		//Instantiations based on the variables defined by the CPU.
+        .addr_in(mem_addr[4:0]),			//CPU sends a 32 bit addr, but we only need the offset i.e. 5 LSBs to determine mode_reg & kernel_reg.
+        .wr_data_in(mem_wdata),				
+        .write_en(proc_sel & |mem_wstrb),	//Write action only if CPU is pointing at any 0x03.. address or the Write Strobe signal is high.
+        .rd_data_out(proc_do)				//Connects proc output to the READ MUX.
+	);
 
 
 	//----------------------------------------------------------------

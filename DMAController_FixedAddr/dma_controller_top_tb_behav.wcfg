@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="dma_controller_top_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="dma_controller_top_tb" />
+            <top_module name="glbl" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="841.168 ns"></ZoomStartTime>
+      <ZoomEndTime time="1,841.169 ns"></ZoomEndTime>
+      <Cursor1Time time="1,215.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="172"></NameColumnWidth>
+      <ValueColumnWidth column_width="80"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="27" />
+   <wvobject fp_name="/dma_controller_top_tb/clk" type="logic">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/cpu_wr_en" type="logic">
+      <obj_property name="ElementShortName">cpu_wr_en</obj_property>
+      <obj_property name="ObjectShortName">cpu_wr_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/cpu_rd_en" type="logic">
+      <obj_property name="ElementShortName">cpu_rd_en</obj_property>
+      <obj_property name="ObjectShortName">cpu_rd_en</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/cpu_addr" type="array">
+      <obj_property name="ElementShortName">cpu_addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cpu_addr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/cpu_wr_data" type="array">
+      <obj_property name="ElementShortName">cpu_wr_data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cpu_wr_data[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/cpu_rd_data" type="array">
+      <obj_property name="ElementShortName">cpu_rd_data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">cpu_rd_data[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/mem_addr" type="array">
+      <obj_property name="ElementShortName">mem_addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_addr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/mem_rdata" type="array">
+      <obj_property name="ElementShortName">mem_rdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_rdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/mem_wdata" type="array">
+      <obj_property name="ElementShortName">mem_wdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">mem_wdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/mem_wr_enable" type="logic">
+      <obj_property name="ElementShortName">mem_wr_enable</obj_property>
+      <obj_property name="ObjectShortName">mem_wr_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/mem_rd_enable" type="logic">
+      <obj_property name="ElementShortName">mem_rd_enable</obj_property>
+      <obj_property name="ObjectShortName">mem_rd_enable</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/async_fifo/full" type="logic">
+      <obj_property name="ElementShortName">full</obj_property>
+      <obj_property name="ObjectShortName">full</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/async_fifo/empty" type="logic">
+      <obj_property name="ElementShortName">empty</obj_property>
+      <obj_property name="ObjectShortName">empty</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/auto_mode" type="logic">
+      <obj_property name="ElementShortName">auto_mode</obj_property>
+      <obj_property name="ObjectShortName">auto_mode</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/count_reg" type="array">
+      <obj_property name="ElementShortName">count_reg[31:0]</obj_property>
+      <obj_property name="ObjectShortName">count_reg[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/auto_ctrl_sig_reg" type="array">
+      <obj_property name="ElementShortName">auto_ctrl_sig_reg[31:0]</obj_property>
+      <obj_property name="ObjectShortName">auto_ctrl_sig_reg[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/dma_rx/inc_src_addr" type="logic">
+      <obj_property name="ElementShortName">inc_src_addr</obj_property>
+      <obj_property name="ObjectShortName">inc_src_addr</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/dma_rx/wr_data" type="array">
+      <obj_property name="ElementShortName">wr_data[31:0]</obj_property>
+      <obj_property name="ObjectShortName">wr_data[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/dma_rx/current_addr" type="array">
+      <obj_property name="ElementShortName">current_addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">current_addr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/dma_tx/current_addr" type="array">
+      <obj_property name="ElementShortName">current_addr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">current_addr[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/irq" type="logic">
+      <obj_property name="ElementShortName">irq</obj_property>
+      <obj_property name="ObjectShortName">irq</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/dut/dma_active" type="logic">
+      <obj_property name="ElementShortName">dma_active</obj_property>
+      <obj_property name="ObjectShortName">dma_active</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/mem_request" type="logic">
+      <obj_property name="ElementShortName">mem_request</obj_property>
+      <obj_property name="ObjectShortName">mem_request</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/mem_grant" type="logic">
+      <obj_property name="ElementShortName">mem_grant</obj_property>
+      <obj_property name="ObjectShortName">mem_grant</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/reset" type="logic">
+      <obj_property name="ElementShortName">reset</obj_property>
+      <obj_property name="ObjectShortName">reset</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/RAM" type="array">
+      <obj_property name="ElementShortName">RAM[0:1023][31:0]</obj_property>
+      <obj_property name="ObjectShortName">RAM[0:1023][31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/dma_controller_top_tb/i" type="array">
+      <obj_property name="ElementShortName">i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i[31:0]</obj_property>
+   </wvobject>
+</wave_config>
